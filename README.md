@@ -1,4 +1,4 @@
-## News Weather App (new)
+# News Weather App (new)
 ### Demo: https://meteoroidalbert.github.io/NewsWeatherApp_new/
 ### 將舊版[News Weather App](https://github.com/MeteoroidAlbert/myproject)的代碼翻新，並改用React.js + Webpack進行編譯，改善UI/UX。
 ### API仍使用舊版中的server.js邏輯，可置舊版參考。
