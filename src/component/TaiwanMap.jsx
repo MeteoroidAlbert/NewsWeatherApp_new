@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import ReactDOM from 'react-dom/client';
 import * as d3 from "d3";
 import taiwanMapData from "../source/taiwan_map.json";
 import { setLoading, setInputShowing } from "../redux/searchSlice";
@@ -8,6 +9,18 @@ import { setIsForecastStartAtMorning, setCityMinT_MaxT_Wx, setCityWeatherData, s
 import { cityWeatherBlockPositionData } from "../source/cityWeatherBlockPositionData";
 import { wxIcon } from "../source/wxIcon";
 
+const CityWeatherBlock = ({ cityInput, minT, maxT, wxIcon }) => {
+    return (
+
+        <div className="cityWeatherBlock bg-[rgba(255,250,240,0.7)] border border-gray-400 text-xs text-center cursor-pointer w-full h-full p-1">
+            <div className="flex justify-center gap-1">{cityInput} <i className={`wi wi-${wxIcon} text-lg `} /></div>
+            <p>{minT}&deg;C ~ {maxT}&deg;C</p>
+        </div>
+
+    );
+};
+
+
 function TaiwanMap() {
     const { isForecastStartAtMorning, cityMinT_MaxT_Wx, cityWeatherData, selectedCity } = useSelector(state => state.cityWeather);
     const dispatch = useDispatch();
@@ -16,8 +29,8 @@ function TaiwanMap() {
 
     useEffect(() => {
         dispatch(setInputShowing(true));
-        getTaiwanMap();
     }, []);
+
 
     useEffect(() => {
         if (selectedCity) {
@@ -29,11 +42,11 @@ function TaiwanMap() {
     }, [selectedCity])
 
     useEffect(() => {
-        if (cityWeatherData) {
+        if (cityMinT_MaxT_Wx) {
             getTaiwanMap();
             setMapLoading(false);
         }
-    }, [cityWeatherData])
+    }, [cityMinT_MaxT_Wx])
 
     //建立互動式台灣地圖svg
     function getTaiwanMap() {
@@ -159,46 +172,57 @@ function TaiwanMap() {
             findCenterData(svgMain, mainFeatures, path);
             findCenterData(svgLJ, LJFeatures, LJPath);
             findCenterData(svgKM, KMFeatures, KMPath);
-
-            //建立地圖上縣市天氣資訊方塊
+            console.log(cityCenterData);
+            
             const createCityWeatherBlock = (svgInput, cityInput, calX, calY) => {
-                if (cityMinT_MaxT_Wx) {
-                    const wxCode = isForecastStartAtMorning ?
-                        wxIcon.find(item => item.id === cityMinT_MaxT_Wx.find(item => item.name === cityInput).wxID).icon[0] :
-                        wxIcon.find(item => item.id === cityMinT_MaxT_Wx.find(item => item.name === cityInput).wxID).icon[1];
-                    svgInput.append("foreignObject")
-                        .attr("x", cityCenterData.find(item => item.name === cityInput).x + calX)
-                        .attr("y", cityCenterData.find(item => item.name === cityInput).y + calY)
-                        .attr("width", 80)
-                        .attr("height", 50)
-                        .append("xhtml:div")
-                        .attr("class", "cityWeatherBlock")
-                        .style("background-color", "rgba(255, 250, 240, 0.7)")
-                        .style("border", "1px solid gray")
-                        .style("font-size", "0.8rem")
-                        .style("text-align", "center")
-                        .style("cursor", "pointer")
-                        .html(`${cityInput} <i class="wi wi-${wxCode} cityWeatherBlockWxIcon"></i><br>${cityMinT_MaxT_Wx.find(item => item.name === cityInput).minT}\u00B0C ~ ${cityMinT_MaxT_Wx.find(item => item.name === cityInput).maxT}\u00B0C`)
-                        .on("click", () => {
-                            dispatch(setSelectedCity(cityInput));
-                            [...document.querySelectorAll("path")].filter(element => element.id !== "info").forEach(item => item.setAttribute("fill", "#808000"));
-                            document.getElementById(cityInput).setAttribute("fill", "#ffa500");
+                const wxCode = isForecastStartAtMorning ?
+                    wxIcon.find(item => item.id === cityMinT_MaxT_Wx.find(item => item.name === cityInput).wxID).icon[0] :
+                    wxIcon.find(item => item.id === cityMinT_MaxT_Wx.find(item => item.name === cityInput).wxID).icon[1];
 
-                        })
-                        .on("mouseover", function (event, d) {
-                            if (cityInput !== selectedCityRef.current) {
-                                d3.select(`#${cityInput}`).attr("fill", "#ffd700");
-                            }
-                        })
-                        .on("mouseout", function (event, d) {
-                            if (cityInput !== selectedCityRef.current) {
-                                const pathRegion = document.getElementById(cityInput);
-                                d3.select(`#${cityInput}`).attr("fill", "#808000");
-                            }
-                        })
-                }
+                const foreignObject = svgInput.append("foreignObject")
+                    .attr("x", cityCenterData.find(item => item.name === cityInput).x + calX)
+                    .attr("y", cityCenterData.find(item => item.name === cityInput).y + calY)
+                    .attr("width", 80)
+                    .attr("height", 40)
+                    .style("background", "transparent")
+                    .on("click", () => {
+                        dispatch(setSelectedCity(cityInput));
+                        [...document.querySelectorAll("path")].filter(element => element.id !== "info").forEach(item => item.setAttribute("fill", "#808000"));
+                        document.getElementById(cityInput).setAttribute("fill", "#ffa500")
+                    })
+                    .on("mouseover", function (event, d) {
+                        if (cityInput !== selectedCityRef.current) {
+                            d3.select(`#${cityInput}`).attr("fill", "#ffd700");
+                        }
+                    })
+                    .on("mouseout", function (event, d) {
+                        if (cityInput !== selectedCityRef.current) {
+                            const pathRegion = document.getElementById(cityInput);
+                            d3.select(`#${cityInput}`).attr("fill", "#808000");
+                        }
+                    })
+                    .node();
 
+                const container = document.createElement("div");
+                container.setAttribute("xmlns", "http://www.w3.org/1999/xhtml");
+                container.setAttribute("id", `container-${cityInput}`);
+                container.style.width = "100%";
+                container.style.height = "100%";
+                foreignObject.appendChild(container);
+
+                ReactDOM.createRoot(container)
+                    .render(
+                        <CityWeatherBlock
+                            cityInput={cityInput}
+                            x={0}
+                            y={0}
+                            minT={cityMinT_MaxT_Wx.find(item => item.name === cityInput).minT}
+                            maxT={cityMinT_MaxT_Wx.find(item => item.name === cityInput).maxT}
+                            wxIcon={wxCode}
+                        />
+                    );
             }
+
 
             cityWeatherBlockPositionData.forEach(item => {
                 if (item.name === "連江縣") {
@@ -210,10 +234,9 @@ function TaiwanMap() {
                 else {
                     createCityWeatherBlock(svgMain, item.name, item.calX, item.calY)
                 }
+
             })
 
-
-            //處理器(用戶互動時觸發):
             //處理點擊地圖上特定縣市時將該地區標色
             function updateRegionColor(element) {
                 //將未選定區域標標色為統一顏色
@@ -240,7 +263,7 @@ function TaiwanMap() {
                 <div id="map" className="relative h-full">
                     {
                         mapLoading ?
-                            <div className="absolute top-0 z-40 flex justify-center items-center bg-gray-300/[0.5] w-full h-full">
+                            <div className="absolute top-0 z-40 flex justify-center items-center bg-gray-300 w-full h-full">
                                 <div className="h-12 w-12 border-4 border-black border-dashed rounded-full animate-spin"></div>
                                 <div className="text-black text-3xl ml-2 ">Fetching Map Info...</div>
                             </div>
