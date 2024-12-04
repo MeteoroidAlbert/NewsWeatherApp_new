@@ -22,7 +22,9 @@ function CityForecast() {
             cityDropdown.innerHTML += `<option value=${item.name}>${item.name}</option>`;
         });
         //取得全台縣市天氣資訊
-        axios.get(`https://news-weather-app-4.onrender.com/city-weather`)
+        // const url = "https://news-weather-app-4.onrender.com/city-weather";
+        const url = "https://news-weather-app-4.onrender.com/newsweather/city-weather";
+        axios.get(url)
             .then(res => {
                 dispatch(setCityWeatherData(res.data));
             })
@@ -81,7 +83,9 @@ function CityForecast() {
         else {
             dispatch(setLoading(true));
             const cityID = citySourceID[index].id;
-            axios.get(`https://news-weather-app-4.onrender.com/townships?cityID=${cityID}`)
+            // const url = `https://news-weather-app-4.onrender.com/townships?cityID=${cityID}`;
+            const url = `https://news-weather-app-4.onrender.com/newsweather/townships?cityID=${cityID}`
+            axios.get(url)
                 .then(res => {
                     console.log(res.data);
                     dispatch(setTownshipData(res.data));

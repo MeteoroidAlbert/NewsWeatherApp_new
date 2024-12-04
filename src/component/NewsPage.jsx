@@ -29,7 +29,8 @@ function NewsPage() {
 
     function fetchNews(page, input) {
         console.log(`Fetching news for ${input}, page number ${page}`);
-        const url = `https://news-weather-app-4.onrender.com/news?q=${input}&page=${page}`;
+        // const url = `https://news-weather-app-4.onrender.com/news?q=${input}&page=${page}`;
+        const url = `https://news-weather-app-4.onrender.com/newsweather/news?q=${input}&page=${page}`;
 
         axios.get(url)
             .then((res) => {
