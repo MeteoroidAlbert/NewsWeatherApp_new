@@ -172,12 +172,12 @@ function TaiwanMap() {
             findCenterData(svgMain, mainFeatures, path);
             findCenterData(svgLJ, LJFeatures, LJPath);
             findCenterData(svgKM, KMFeatures, KMPath);
-            console.log(cityCenterData);
+            // console.log(cityCenterData);
             
             const createCityWeatherBlock = (svgInput, cityInput, calX, calY) => {
                 const wxCode = isForecastStartAtMorning ?
-                    wxIcon.find(item => item.id === cityMinT_MaxT_Wx.find(item => item.name === cityInput).wxID).icon[0] :
-                    wxIcon.find(item => item.id === cityMinT_MaxT_Wx.find(item => item.name === cityInput).wxID).icon[1];
+                    wxIcon.find(item => item.id === cityMinT_MaxT_Wx.find(item => item.name === cityInput).wxID)?.icon[0] :
+                    wxIcon.find(item => item.id === cityMinT_MaxT_Wx.find(item => item.name === cityInput).wxID)?.icon[1];
 
                 const foreignObject = svgInput.append("foreignObject")
                     .attr("x", cityCenterData.find(item => item.name === cityInput).x + calX)

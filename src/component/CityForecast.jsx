@@ -26,24 +26,27 @@ function CityForecast() {
         const url = "https://news-weather-app-4.onrender.com/newsweather/city-weather";
         axios.get(url)
             .then(res => {
+                console.log(res.data);
+                // console.log(res.data.records.Locations[0].Location[0].WeatherElement[0].Time);
                 dispatch(setCityWeatherData(res.data));
             })
             .catch(err => console.log(err));
     }, [])
 
     useEffect(() => {
-        if (cityWeatherData?.records?.locations[0]?.location) {
-            const updatedData = cityWeatherData.records.locations[0].location.map(item => ({
-                name: item.locationName,
-                minT: item.weatherElement[8]?.time[0].elementValue[0].value,
-                maxT: item.weatherElement[12]?.time[0].elementValue[0].value,
-                wxID: item.weatherElement[6]?.time[0].elementValue[1].value
+        if (cityWeatherData?.records?.Locations[0]?.Location) {
+            const updatedData = cityWeatherData.records.Locations[0].Location.map(item => ({
+                name: item.LocationName,
+                minT: item.WeatherElement[2]?.Time[0]?.ElementValue[0].MinTemperature,
+                maxT: item.WeatherElement[1]?.Time[0]?.ElementValue[0].MaxTemperature,
+                wxID: item.WeatherElement[12]?.Time[0]?.ElementValue[0].WeatherCode
             }));
 
+            console.log(updatedData);
             dispatch(setCityMinT_MaxT_Wx(updatedData));
 
             const morning = /18:00:00/;
-            const booleanVal = morning.test(cityWeatherData.records.locations[0].location[0].weatherElement[0].time[0].endTime);
+            const booleanVal = morning.test(cityWeatherData.records.Locations[0].Location[0].WeatherElement[0].Time[0]?.EndTime);
             dispatch(setIsForecastStartAtMorning(booleanVal));
         }
     }, [cityWeatherData]);
@@ -56,10 +59,10 @@ function CityForecast() {
         //建立鄉鎮下拉式選單
         if (townshipData) {
             const townshipDropdown = document.getElementById("townshipDropdown");
-            townshipData.records.locations[0].location.forEach((item) => {
-                townshipDropdown.innerHTML += `<option value="${item.locationName}">${item.locationName}</option>`;
+            townshipData.records.Locations[0].Location.forEach((item) => {
+                townshipDropdown.innerHTML += `<option value="${item.LocationName}">${item.LocationName}</option>`;
             });
-            dispatch(setSelectedTownship(townshipData.records.locations[0].location[0].locationName));
+            dispatch(setSelectedTownship(townshipData.records.Locations[0].Location[0].LocationName));
         }
     }, [townshipData])
 
@@ -69,7 +72,7 @@ function CityForecast() {
         const cityIndex = citySourceID.findIndex(item => item.name == selectedCity);
         getTownship(cityIndex)
         if (cityWeatherData) {
-            updateCityWeatherInfoShowToUser();
+                updateCityWeatherInfoShowToUser();            
         }
     }, [selectedCity])
 
@@ -102,29 +105,30 @@ function CityForecast() {
     //取得選定縣市天氣資訊(根據所選縣市改變時呼叫)
     function updateCityWeatherInfoShowToUser() {
         //建立搜索天氣數據的函式
-        if (cityWeatherData) {
-            const cityIndex = cityWeatherData.records.locations[0].location.findIndex(item => item.locationName === selectedCity);
-            const searchWeatherElement = (weatherElementInput, elementValueIndex) => {
-                const value = cityWeatherData.records.locations[0].location[cityIndex].weatherElement?.find(item => item.elementName === weatherElementInput).time[0].elementValue[elementValueIndex].value;
+        if (cityWeatherData.records.Locations[0].Location[0].WeatherElement[0].Time) {
+            const cityIndex = cityWeatherData.records.Locations[0].Location.findIndex(item => item.LocationName === selectedCity);
+            
+            const searchWeatherElement = (weatherElementInput, elementNameInput) => {
+                const value = cityWeatherData.records.Locations[0].Location[cityIndex].WeatherElement?.find(item => item.ElementName === weatherElementInput).Time[0]?.ElementValue[0][elementNameInput];
                 return value;
             }
 
             //取得天氣狀態描述的id，在根據早晚來決定實際使用的icon
-            const searchWxId = cityWeatherData.records.locations[0].location[cityIndex].weatherElement?.find(item => item.elementName === "Wx").time[0].elementValue[1].value;
+            const searchWxId = cityWeatherData.records.Locations[0].Location[cityIndex].WeatherElement?.find(item => item.ElementName === "天氣現象").Time[0]?.ElementValue[0].WeatherCode;
             const wxCode = isForecastStartAtMorning ? wxIcon.find(item => item.id === searchWxId).icon[0] : wxIcon.find(item => item.id === searchWxId).icon[1];
 
             //使用搜索天氣數據函式將數據一一代入個個state，即可將數據呈現給用戶
             dispatch(setCityWxIcon(`<i class="wi wi-${wxCode}" id="wxIcon"></i>`));
-            dispatch(setCityAvgTemp(searchWeatherElement("T", 0)));
-            dispatch(setCityWx(searchWeatherElement("Wx", 0)));
-            dispatch(setCityRainDrop(searchWeatherElement("PoP12h", 0)));
-            dispatch(setCityMinToMaxTemp(`${searchWeatherElement("MinT", 0)} ~ ${searchWeatherElement("MaxT", 0)}`));
-            dispatch(setCityWS(searchWeatherElement("WS", 0)));
-            dispatch(setCityWD(searchWeatherElement("WD", 0)));
-            dispatch(setCityRH(searchWeatherElement("RH", 0)));
-            dispatch(setCityMaxAT(searchWeatherElement("MaxAT", 0)));
-            dispatch(setCityUVI(`${searchWeatherElement("UVI", 0)} (${searchWeatherElement("UVI", 1)})`));
-            dispatch(setCityMaxCI(searchWeatherElement("MaxCI", 1)));
+            dispatch(setCityAvgTemp(searchWeatherElement("平均溫度", "Temperature")));
+            dispatch(setCityWx(searchWeatherElement("天氣現象", "Weather")));
+            dispatch(setCityRainDrop(searchWeatherElement("12小時降雨機率", "ProbabilityOfPrecipitation")));
+            dispatch(setCityMinToMaxTemp(`${searchWeatherElement("最低溫度", "MinTemperature")} ~ ${searchWeatherElement("最高溫度", "MaxTemperature")}`));
+            dispatch(setCityWS(searchWeatherElement("風速", "WindSpeed")));
+            dispatch(setCityWD(searchWeatherElement("風向", "WindDirection")));
+            dispatch(setCityRH(searchWeatherElement("平均相對濕度", "RelativeHumidity")));
+            dispatch(setCityMaxAT(searchWeatherElement("最高體感溫度", "MaxApparentTemperature")));
+            dispatch(setCityUVI(`${searchWeatherElement("紫外線指數", "UVIndex")} (${searchWeatherElement("紫外線指數", "UVExposureLevel")})`));
+            dispatch(setCityMaxCI(searchWeatherElement("最大舒適度指數", "MaxComfortIndexDescription")));
         }
 
 

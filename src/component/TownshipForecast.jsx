@@ -18,17 +18,17 @@ function TownshipForecast() {
 
     function updateTownshipWeatherInfoShowToUser() {
         if (townshipData && selectedTownship) {
-            const townshipIndex = townshipData.records.locations[0].location.findIndex(item => item.locationName === selectedTownship);
+            const townshipIndex = townshipData.records.Locations[0].Location.findIndex(item => item.LocationName === selectedTownship);
 
-            const searchWeatherElement = (weatherElementInput) => townshipData.records.locations[0].location[townshipIndex].weatherElement?.find(item => item.elementName === weatherElementInput);
-            const targetTownshipAvgTemp = (index) => searchWeatherElement("T")?.time[index].elementValue[0].value;
-            const targetTownshipPoP12h = (index) => searchWeatherElement("PoP12h")?.time[index].elementValue[0].value;
-            const targetTownshipWx = (index) => searchWeatherElement("Wx")?.time[index].elementValue[0].value;
-            const targetTownshipMaxT = (index) => searchWeatherElement("MaxT")?.time[index].elementValue[0].value;
-            const targetTownshipMinT = (index) => searchWeatherElement("MinT")?.time[index].elementValue[0].value;
-            const targetTownshipMaxAT = (index) => searchWeatherElement("MaxAT")?.time[index].elementValue[0].value;
-            const predictTime = (index) => searchWeatherElement("MaxAT")?.time[index].endTime;
-            const predictDate = (index) => searchWeatherElement("MaxAT")?.time[index].startTime;
+            const searchWeatherElement = (weatherElementInput) => townshipData.records.Locations[0].Location[townshipIndex].WeatherElement?.find(item => item.ElementName === weatherElementInput);
+            const targetTownshipAvgTemp = (index) => searchWeatherElement("平均溫度")?.Time[index].ElementValue[0].Temperature;
+            const targetTownshipPoP12h = (index) => searchWeatherElement("12小時降雨機率")?.Time[index].ElementValue[0].ProbabilityOfPrecipitation;
+            const targetTownshipWx = (index) => searchWeatherElement("天氣現象")?.Time[index].ElementValue[0].Weather;
+            const targetTownshipMaxT = (index) => searchWeatherElement("最高溫度")?.Time[index].ElementValue[0].MaxTemperature;
+            const targetTownshipMinT = (index) => searchWeatherElement("最低溫度")?.Time[index].ElementValue[0].MinTemperature;
+            const targetTownshipMaxAT = (index) => searchWeatherElement("最高體感溫度")?.Time[index].ElementValue[0].MaxApparentTemperature;
+            const predictTime = (index) => searchWeatherElement("最高體感溫度")?.Time[index].EndTime;
+            const predictDate = (index) => searchWeatherElement("最高體感溫度")?.Time[index].StartTime;
 
             const arrayLength = isForecastStartAtMorning ? 10 : 9;
 
