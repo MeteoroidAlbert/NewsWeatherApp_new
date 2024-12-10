@@ -5,3 +5,6 @@
 ### 功能: 全球新聞搜索、全台縣市與鄉鎮天氣預報、互動式地圖
 ### 伺服器經長時間未使用後會導致初次處理Request速度較慢，通常約需等待1-3 mins，請耐心等待。
 ### 使用技術: HTML/CSS、JavaScript、React.js(React Roouter, Redux Toolkit)、D3.js(SVG地圖繪製)、Tailwind CSS、Webpack
+
+
+### 12/10(二) 11:00 a.m 因中央氣象局已更新API中JSON數據格式，造成原v1.1版本代碼中關於天氣預報的渲染出現錯誤，現已修復(12/10 21:00)
