@@ -35,19 +35,31 @@ function CityForecast() {
 
     useEffect(() => {
         if (cityWeatherData?.records?.Locations[0]?.Location) {
+            const indexForSearch = isForecastStartAtMorning ? 0 : 1;
             const updatedData = cityWeatherData.records.Locations[0].Location.map(item => ({
                 name: item.LocationName,
-                minT: item.WeatherElement[2]?.Time[0]?.ElementValue[0].MinTemperature,
-                maxT: item.WeatherElement[1]?.Time[0]?.ElementValue[0].MaxTemperature,
-                wxID: item.WeatherElement[12]?.Time[0]?.ElementValue[0].WeatherCode
+                minT: item.WeatherElement[2]?.Time[indexForSearch]?.ElementValue[0].MinTemperature,
+                maxT: item.WeatherElement[1]?.Time[indexForSearch]?.ElementValue[0].MaxTemperature,
+                wxID: item.WeatherElement[12]?.Time[indexForSearch]?.ElementValue[0].WeatherCode
             }));
 
             console.log(updatedData);
             dispatch(setCityMinT_MaxT_Wx(updatedData));
 
-            const morning = /18:00:00/;
-            const booleanVal = morning.test(cityWeatherData.records.Locations[0].Location[0].WeatherElement[0].Time[0]?.EndTime);
-            dispatch(setIsForecastStartAtMorning(booleanVal));
+            // const morning = /18:00:00/;
+            // const booleanVal = morning.test(cityWeatherData.records.Locations[0].Location[0].WeatherElement[0].Time[0]?.EndTime);
+            const timeOfForecast = new Date(cityWeatherData.records.Locations[0].Location[0].WeatherElement[0].Time[0]?.EndTime);
+            
+            const tiemstampOfForecast = timeOfForecast.getDate();
+            const timestampNow = Date.now();
+            
+            if (tiemstampOfForecast < timestampNow) {
+                dispatch(setIsForecastStartAtMorning(false));
+            }
+            else {
+                dispatch(setIsForecastStartAtMorning(true));
+            }
+            // dispatch(setIsForecastStartAtMorning(booleanVal));
         }
     }, [cityWeatherData]);
 
@@ -69,6 +81,7 @@ function CityForecast() {
 
     useEffect(() => {
         // 更新鄉鎮下拉式選單(根據所選縣市改變)
+        if (selectedCity === "選擇一個縣市") return;
         const cityIndex = citySourceID.findIndex(item => item.name == selectedCity);
         getTownship(cityIndex)
         if (cityWeatherData) {
@@ -107,14 +120,16 @@ function CityForecast() {
         //建立搜索天氣數據的函式
         if (cityWeatherData.records.Locations[0].Location[0].WeatherElement[0].Time) {
             const cityIndex = cityWeatherData.records.Locations[0].Location.findIndex(item => item.LocationName === selectedCity);
-            
+            const indexForSearch = isForecastStartAtMorning ? 0 : 1;
+
             const searchWeatherElement = (weatherElementInput, elementNameInput) => {
-                const value = cityWeatherData.records.Locations[0].Location[cityIndex].WeatherElement?.find(item => item.ElementName === weatherElementInput).Time[0]?.ElementValue[0][elementNameInput];
+                
+                const value = cityWeatherData.records.Locations[0].Location[cityIndex].WeatherElement?.find(item => item.ElementName === weatherElementInput).Time[indexForSearch]?.ElementValue[0][elementNameInput];
                 return value;
             }
 
             //取得天氣狀態描述的id，在根據早晚來決定實際使用的icon
-            const searchWxId = cityWeatherData.records.Locations[0].Location[cityIndex].WeatherElement?.find(item => item.ElementName === "天氣現象").Time[0]?.ElementValue[0].WeatherCode;
+            const searchWxId = cityWeatherData.records.Locations[0].Location[cityIndex].WeatherElement?.find(item => item.ElementName === "天氣現象").Time[indexForSearch]?.ElementValue[0].WeatherCode;
             const wxCode = isForecastStartAtMorning ? wxIcon.find(item => item.id === searchWxId).icon[0] : wxIcon.find(item => item.id === searchWxId).icon[1];
 
             //使用搜索天氣數據函式將數據一一代入個個state，即可將數據呈現給用戶
