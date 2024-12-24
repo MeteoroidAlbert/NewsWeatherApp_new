@@ -7,4 +7,4 @@
 ### 使用技術: HTML/CSS、JavaScript、React.js(React Roouter, Redux Toolkit)、D3.js(SVG地圖繪製)、Tailwind CSS、Webpack
 
 
-### 12/10(二) 11:00 a.m 因中央氣象局已更新API中JSON數據格式，造成原v1.1版本代碼中關於天氣預報的渲染出現錯誤，現已修復(12/10 21:00)
+
