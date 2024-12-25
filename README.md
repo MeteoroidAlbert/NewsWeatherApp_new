@@ -7,4 +7,4 @@
 ### 使用技術: HTML/CSS、JavaScript、React.js(React Roouter, Redux Toolkit)、D3.js(SVG地圖繪製)、Tailwind CSS、Webpack
 
 
-
+## 當前由於Open API提供資料更新異常，導致氣象預報更新異常，敬請見諒。
