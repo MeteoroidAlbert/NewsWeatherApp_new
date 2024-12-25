@@ -30,25 +30,10 @@ function TownshipForecast() {
             const predictTime = (index) => searchWeatherElement("最高體感溫度")?.Time[index].EndTime;
             const predictDate = (index) => searchWeatherElement("最高體感溫度")?.Time[index].StartTime;
 
-            // const arrayLength = isForecastStartAtMorning ? 10 : 9;
+            const arrayLength = isForecastStartAtMorning ? 10 : 9;
 
             let dataArray = [];
-            // for (let i = 0; i < arrayLength; i++) {
-
-            //     const data = {
-            //         AvgTemp: targetTownshipAvgTemp(i),
-            //         PoP12h: targetTownshipPoP12h(i),
-            //         Wx: targetTownshipWx(i),
-            //         MaxTtoMinT: `${targetTownshipMinT(i)} ~ ${targetTownshipMaxT(i)}`,
-            //         MaxAT: targetTownshipMaxAT(i),
-            //         Predict: (predictTime(i).substring(11, 16) === "18:00") ? "白天" : "夜晚",
-            //         Date: predictDate(i).substring(0, 10),
-            //     }
-            //     dataArray.push(data);
-            // };
-
-            for (let i = isForecastStartAtMorning? 0 : 1; i < 10; i++) {
-                
+            for (let i = 0; i < arrayLength; i++) {
 
                 const data = {
                     AvgTemp: targetTownshipAvgTemp(i),
@@ -61,6 +46,8 @@ function TownshipForecast() {
                 }
                 dataArray.push(data);
             };
+            console.log(isForecastStartAtMorning);
+
 
 
             if (!isForecastStartAtMorning) {
