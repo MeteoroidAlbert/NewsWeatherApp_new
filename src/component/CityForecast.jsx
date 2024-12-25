@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { citySourceID } from "../source/citySourceID";
 import { wxIcon } from "../source/wxIcon";
 import { setSelectedCity, setCityWeatherData, setCityMinT_MaxT_Wx, setIsForecastStartAtMorning, setCityWx, setCityWxIcon, setCityRainDrop, setCityAvgTemp, setCityMinToMaxTemp, setCityWS, setCityWD, setCityRH, setCityMaxAT, setCityUVI, setCityMaxCI } from "../redux/cityWeatherSlice";
@@ -35,12 +35,12 @@ function CityForecast() {
 
     useEffect(() => {
         if (cityWeatherData?.records?.Locations[0]?.Location) {
-            const indexForSearch = isForecastStartAtMorning ? 0 : 1;
+            
             const updatedData = cityWeatherData.records.Locations[0].Location.map(item => ({
                 name: item.LocationName,
-                minT: item.WeatherElement[2]?.Time[indexForSearch]?.ElementValue[0].MinTemperature,
-                maxT: item.WeatherElement[1]?.Time[indexForSearch]?.ElementValue[0].MaxTemperature,
-                wxID: item.WeatherElement[12]?.Time[indexForSearch]?.ElementValue[0].WeatherCode
+                minT: item.WeatherElement[2]?.Time[0]?.ElementValue[0].MinTemperature,
+                maxT: item.WeatherElement[1]?.Time[0]?.ElementValue[0].MaxTemperature,
+                wxID: item.WeatherElement[12]?.Time[0]?.ElementValue[0].WeatherCode
             }));
 
             console.log(updatedData);
@@ -48,22 +48,20 @@ function CityForecast() {
 
             // const morning = /18:00:00/;
             // const booleanVal = morning.test(cityWeatherData.records.Locations[0].Location[0].WeatherElement[0].Time[0]?.EndTime);
-            const timeOfForecast = new Date(cityWeatherData.records.Locations[0].Location[0].WeatherElement[0].Time[0]?.EndTime);
             
-            const tiemstampOfForecast = timeOfForecast.getDate();
+            const timeOfForecast = new Date(cityWeatherData.records.Locations[0].Location[0].WeatherElement[0].Time[0]?.EndTime);
+            const tiemstampOfForecast = timeOfForecast.getTime();
             const timestampNow = Date.now();
             
-            if (tiemstampOfForecast < timestampNow) {
-                dispatch(setIsForecastStartAtMorning(false));
+            if (tiemstampOfForecast > timestampNow) {
+                dispatch(setIsForecastStartAtMorning(true));
             }
             else {
-                dispatch(setIsForecastStartAtMorning(true));
+                dispatch(setIsForecastStartAtMorning(false));
             }
             // dispatch(setIsForecastStartAtMorning(booleanVal));
         }
     }, [cityWeatherData]);
-
-
 
 
 
